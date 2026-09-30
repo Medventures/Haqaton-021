@@ -14,9 +14,9 @@ function navFor(role: Role, t: Dictionary, badges: Partial<Record<string, number
     case "parent":
       return [
         { href: "/parent", label: t.nav.route, exact: true },
+        { href: "/specialists", label: t.nav.specialists },
         { href: "/parent/calendar", label: t.nav.calendar },
         { href: "/parent/documents", label: t.nav.documents },
-        { href: "/specialists", label: t.nav.specialists },
         { href: "/parent/subscription", label: t.nav.subscription },
       ];
     case "curator":
