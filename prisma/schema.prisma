@@ -1,0 +1,188 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./aqylroute.db"
+}
+
+model User {
+  id                String             @id @default(cuid())
+  email             String             @unique
+  passwordHash      String
+  name              String
+  phone             String?
+  role              String
+  status            String             @default("active")
+  locale            String             @default("ru")
+  createdAt         DateTime           @default(now())
+  parentCases       Case[]             @relation("ParentCases")
+  curatorCases      Case[]             @relation("CuratorCases")
+  specialistProfile SpecialistProfile?
+  subscriptions     Subscription[]
+  consents          Consent[]
+  reviews           Review[]           @relation("ReviewAuthor")
+  moderatedReviews  Review[]           @relation("ReviewModerator")
+  calendarEvents    CalendarEvent[]
+  files             StoredFile[]
+}
+
+model Case {
+  id             String            @id @default(cuid())
+  parentId       String
+  parent         User              @relation("ParentCases", fields: [parentId], references: [id], onDelete: Cascade)
+  curatorId      String?
+  curator        User?             @relation("CuratorCases", fields: [curatorId], references: [id], onDelete: SetNull)
+  childName      String
+  status         String            @default("interview")
+  facts          String            @default("{}")
+  interview      String            @default("[]")
+  plan           String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  escalations    EscalationEvent[]
+  calendarEvents CalendarEvent[]
+  files          StoredFile[]
+
+  @@index([parentId])
+  @@index([curatorId])
+}
+
+model EscalationEvent {
+  id         String    @id @default(cuid())
+  caseId     String
+  case       Case      @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  stepId     String
+  level      Int
+  createdAt  DateTime  @default(now())
+  resolvedAt DateTime?
+  note       String?
+
+  @@index([caseId, stepId])
+}
+
+model InterviewQuestion {
+  id         String   @id
+  builtIn    Boolean
+  kind       String
+  required   Boolean
+  active     Boolean  @default(true)
+  sortOrder  Int
+  questionRu String
+  questionKk String
+  options    String   @default("[]")
+  updatedAt  DateTime @updatedAt
+}
+
+model SpecialistProfile {
+  id               String       @id @default(cuid())
+  userId           String       @unique
+  user             User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category         String
+  city             String
+  experienceYears  Int
+  aboutRu          String
+  aboutKk          String
+  education        String
+  priceKzt         Int?
+  formats          String       @default("[]")
+  languages        String       @default("[]")
+  contact          String
+  status           String       @default("pending")
+  commissionNote   String?
+  reviewedById     String?
+  reviewedAt       DateTime?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  reviews          Review[]
+  files            StoredFile[]
+
+  @@index([status, category])
+}
+
+model Review {
+  id             String            @id @default(cuid())
+  specialistId   String
+  specialist     SpecialistProfile @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+  authorId       String
+  author         User              @relation("ReviewAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  rating         Int
+  text           String
+  status         String            @default("pending")
+  moderatorId    String?
+  moderator      User?             @relation("ReviewModerator", fields: [moderatorId], references: [id], onDelete: SetNull)
+  moderationNote String?
+  moderatedAt    DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@unique([specialistId, authorId])
+  @@index([status])
+}
+
+model Subscription {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan       String
+  priceKzt   Int
+  status     String   @default("active")
+  startsAt   DateTime
+  endsAt     DateTime
+  paymentRef String
+  createdAt  DateTime @default(now())
+
+  @@index([userId, status])
+}
+
+model Consent {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  document   String
+  version    String
+  acceptedAt DateTime @default(now())
+  ip         String?
+  userAgent  String?
+
+  @@index([userId, document])
+}
+
+model CalendarEvent {
+  id        String   @id @default(cuid())
+  caseId    String?
+  case      Case?    @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  ownerId   String
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  type      String
+  title     String
+  startsAt  DateTime
+  endsAt    DateTime?
+  notes     String?
+  createdAt DateTime @default(now())
+
+  @@index([caseId, startsAt])
+  @@index([ownerId, startsAt])
+}
+
+model StoredFile {
+  id                  String             @id @default(cuid())
+  caseId              String?
+  case                Case?              @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  specialistProfileId String?
+  specialistProfile   SpecialistProfile? @relation(fields: [specialistProfileId], references: [id], onDelete: Cascade)
+  uploaderId          String
+  uploader            User               @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+  category            String
+  documentId          String?
+  title               String
+  fileName            String
+  mimeType            String
+  size                Int
+  data                Bytes
+  createdAt           DateTime           @default(now())
+
+  @@index([caseId])
+  @@index([specialistProfileId])
+}

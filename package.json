@@ -1,0 +1,50 @@
+{
+  "name": "aqylroute",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "prisma db push --skip-generate && tsx prisma/ensure-seed.ts && next start",
+    "lint": "eslint",
+    "postinstall": "prisma generate",
+    "db:push": "prisma db push",
+    "db:seed": "prisma db seed",
+    "test:flow": "tsx scripts/test-flow.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "class-variance-authority": "^0.7.1",
+    "cn": "^0.4.0",
+    "jose": "^6.2.12",
+    "lucide-react": "^1.49.0",
+    "next": "16.3.7",
+    "next-themes": "^0.4.6",
+    "openai": "^7.25.0",
+    "prisma": "^6.19.3",
+    "radix-ui": "^1.6.7",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "shadcn": "^4.21.0",
+    "sonner": "^2.0.8",
+    "tsx": "^4.23.15",
+    "tw-animate-css": "^1.4.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.7",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "engines": {
+    "node": "22.x"
+  }
+}
