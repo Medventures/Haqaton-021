@@ -26,6 +26,7 @@ model User {
   moderatedReviews  Review[]           @relation("ReviewModerator")
   calendarEvents    CalendarEvent[]
   files             StoredFile[]
+  specialistAccess  CaseSpecialistAccess[] @relation("SharedSpecialist")
 }
 
 model Case {
@@ -44,6 +45,9 @@ model Case {
   escalations    EscalationEvent[]
   calendarEvents CalendarEvent[]
   files          StoredFile[]
+  dailyEntries  DailyEntry[]
+  meltdowns     Meltdown[]
+  specialistAccess CaseSpecialistAccess[]
 
   @@index([parentId])
   @@index([curatorId])
@@ -185,4 +189,47 @@ model StoredFile {
 
   @@index([caseId])
   @@index([specialistProfileId])
+}
+
+model DailyEntry {
+  id        String   @id @default(cuid())
+  caseId    String
+  case      Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  day       String
+  sleepHours Float?
+  mood      String?
+  notes     String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([caseId, day])
+  @@index([caseId, day])
+}
+
+model Meltdown {
+  id              String   @id @default(cuid())
+  caseId          String
+  case            Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  occurredAt      DateTime
+  durationMinutes Int?
+  intensity       Int
+  triggers        String   @default("[]")
+  before          String   @default("")
+  behavior        String   @default("")
+  response        String   @default("")
+  after           String   @default("")
+  createdAt       DateTime @default(now())
+
+  @@index([caseId, occurredAt])
+}
+
+model CaseSpecialistAccess {
+  caseId       String
+  case         Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  specialistId String
+  specialist   User     @relation("SharedSpecialist", fields: [specialistId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+
+  @@id([caseId, specialistId])
+  @@index([specialistId])
 }

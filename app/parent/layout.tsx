@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 export default async function ParentLayout({ children }: { children: React.ReactNode }) {
   const user = await requirePageUser("parent");
   return (
-    <AppShell user={user} width="narrow">
+    <AppShell user={user}>
       {children}
     </AppShell>
   );

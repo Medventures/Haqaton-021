@@ -122,7 +122,7 @@ export function InterviewChat({ initialState }: { initialState: InterviewState }
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="sticky top-14 z-10 -mx-4 border-b bg-background/95 px-4 py-3 backdrop-blur">
+      <div className="sticky top-14 z-10 -mx-4 border-b bg-background/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 lg:top-[7.375rem]">
         <div className="flex items-center justify-between gap-3">
           <Button
             variant="ghost"

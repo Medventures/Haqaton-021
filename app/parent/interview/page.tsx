@@ -17,5 +17,9 @@ export default async function InterviewPage() {
     redirect("/parent");
   }
   const started = await ensureInterviewStarted(record, await getLocale());
-  return <InterviewChat initialState={await toInterviewState(started)} />;
+  return (
+    <div className="mx-auto w-full max-w-3xl">
+      <InterviewChat initialState={await toInterviewState(started)} />
+    </div>
+  );
 }

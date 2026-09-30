@@ -6,18 +6,30 @@ import { cn } from "@/lib/utils";
 
 export type NavLink = { href: string; label: string; badge?: number; exact?: boolean };
 
-export function NavLinks({ links }: { links: NavLink[] }) {
+export function NavLinks({
+  links,
+  label,
+  vertical = false,
+  onNavigate,
+}: {
+  links: NavLink[];
+  label: string;
+  vertical?: boolean;
+  onNavigate?: () => void;
+}) {
   const pathname = usePathname();
   return (
-    <nav className="-mx-1 flex items-center gap-1 overflow-x-auto px-1 [scrollbar-width:none]">
+    <nav aria-label={label} className={cn("flex gap-2", vertical ? "flex-col" : "w-full items-center")}>
       {links.map((link) => {
         const active = link.exact ? pathname === link.href : pathname === link.href || pathname.startsWith(`${link.href}/`);
         return (
           <Link
             key={link.href}
             href={link.href}
+            onClick={onNavigate}
             className={cn(
-              "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg px-3 text-sm font-medium whitespace-nowrap text-muted-foreground hover:bg-muted hover:text-foreground",
+              "inline-flex min-h-11 min-w-0 items-center gap-1.5 rounded-lg px-3 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground",
+              vertical ? "w-full justify-between" : links.length > 1 ? "flex-1 justify-center text-center" : "justify-start",
               active && "bg-primary/10 text-primary hover:bg-primary/10 hover:text-primary",
             )}
           >

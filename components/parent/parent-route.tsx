@@ -192,129 +192,133 @@ export function ParentRoute({ caseId, childName, curatorName, plan, today }: Pro
         </div>
       ) : null}
 
-      {nextStep && !allDone ? (
-        <section className="rounded-2xl border-2 border-primary bg-white p-5 shadow-sm">
-          <div className="text-xs font-semibold uppercase tracking-wide text-primary">{t.plan.nextAction}</div>
-          <h2 className="mt-1 text-xl font-semibold leading-snug">{stepTitle(nextStep, locale)}</h2>
-          <div className="mt-3 flex flex-col gap-2 text-sm">
-            <div className="flex items-start gap-2">
-              <MapPin className="mt-0.5 size-4 shrink-0 text-primary" />
-              <span>
-                {t.plan.whereToGo}: {stepOrganization(nextStep, locale)}
-              </span>
-            </div>
-            <div className="flex items-start gap-2">
-              <CalendarDays className="mt-0.5 size-4 shrink-0 text-primary" />
-              <span className={cn(overdueDays(nextStep, today) > 0 && "font-medium text-red-700")}>
-                {t.plan.until(formatDate(nextStep.deadline, locale))}
-              </span>
-            </div>
-            {overdueDays(nextStep, today) > 0 ? <p className="rounded-lg bg-red-50 px-3 py-2 text-red-700">{overdueText}</p> : null}
-          </div>
-          <div className="mt-4">
-            <div className="mb-2 flex items-center gap-2 text-sm font-medium">
-              <FileText className="size-4 text-primary" /> {t.plan.takeWith}
-            </div>
-            <DocumentList step={nextStep} editable={false} busy={null} />
-          </div>
-          <Button className="mt-5 h-12 w-full text-base" onClick={() => setOpenStepId(nextStep.id)}>
-            {t.plan.stepDetails} <ChevronRight />
-          </Button>
-        </section>
-      ) : (
-        <section className="rounded-2xl border bg-emerald-50 p-5 text-emerald-800">
-          <CheckCircle2 className="size-8" />
-          <h2 className="mt-2 text-lg font-semibold">{t.plan.allDoneTitle}</h2>
-          <p className="mt-1 text-sm">{t.plan.allDoneText}</p>
-        </section>
-      )}
-
-      <section className="rounded-2xl border bg-white p-5 shadow-sm">
-        <h2 className="font-semibold">{t.plan.summaryTitle}</h2>
-        <p className="mt-2 text-sm leading-relaxed text-foreground/80">{planSummary(plan, locale)}</p>
-        {curatorName ? <p className="mt-3 text-xs text-muted-foreground">{t.plan.yourCurator(curatorName)}</p> : null}
-        {selfManaged ? (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="ghost" size="sm" className="mt-3 h-9 px-2 text-muted-foreground" disabled={busy !== null}>
-                {busy === "restart" ? <Loader2 className="animate-spin" /> : <RotateCcw />} {t.plan.restartInterview}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t.plan.restartTitle}</AlertDialogTitle>
-                <AlertDialogDescription>{t.plan.restartText}</AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
-                <AlertDialogAction onClick={() => void restart()}>{t.common.confirm}</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        ) : null}
-      </section>
-
-      {TRACK_ORDER.map((track) => {
-        const steps = plan.steps.filter((step) => step.track === track);
-        if (steps.length === 0) {
-          return null;
-        }
-        const Icon = TRACK_ICONS[track];
-        const done = steps.filter((step) => step.status === "done").length;
-        const style = TRACK_STYLE[track];
-        return (
-          <section key={track} className="rounded-2xl border bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <span className={cn("flex size-9 items-center justify-center rounded-lg", style.bg, style.text)}>
-                  <Icon className="size-5" />
+      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(320px,1fr)]">
+        {nextStep && !allDone ? (
+          <section className="rounded-2xl border-2 border-primary bg-white p-5 shadow-sm">
+            <div className="text-xs font-semibold uppercase tracking-wide text-primary">{t.plan.nextAction}</div>
+            <h2 className="mt-1 text-xl font-semibold leading-snug">{stepTitle(nextStep, locale)}</h2>
+            <div className="mt-3 flex flex-col gap-2 text-sm">
+              <div className="flex items-start gap-2">
+                <MapPin className="mt-0.5 size-4 shrink-0 text-primary" />
+                <span>
+                  {t.plan.whereToGo}: {stepOrganization(nextStep, locale)}
                 </span>
-                <h2 className="text-lg font-semibold">{t.tracks[track]}</h2>
               </div>
-              <span className="text-right text-sm text-muted-foreground">
-                {done === steps.length ? t.plan.allStages : t.plan.stage(done + 1, steps.length)}
-              </span>
+              <div className="flex items-start gap-2">
+                <CalendarDays className="mt-0.5 size-4 shrink-0 text-primary" />
+                <span className={cn(overdueDays(nextStep, today) > 0 && "font-medium text-red-700")}>
+                  {t.plan.until(formatDate(nextStep.deadline, locale))}
+                </span>
+              </div>
+              {overdueDays(nextStep, today) > 0 ? <p className="rounded-lg bg-red-50 px-3 py-2 text-red-700">{overdueText}</p> : null}
             </div>
-            <Progress value={(done / steps.length) * 100} className="mt-3 h-2" />
-            <ol className="mt-4 flex flex-col">
-              {steps.map((step, index) => {
-                const status = displayStatus(step, today);
-                const late = status === "overdue";
-                return (
-                  <li key={step.id} className="relative flex gap-3">
-                    <div className="flex flex-col items-center">
-                      <span className={cn("mt-4 size-3.5 shrink-0 rounded-full ring-4 ring-white", STATUS_STYLE[status].dot)} />
-                      {index < steps.length - 1 ? <span className="w-px flex-1 bg-border" /> : null}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setOpenStepId(step.id)}
-                      className={cn(
-                        "mb-2 flex min-h-14 min-w-0 flex-1 flex-col gap-1.5 rounded-xl px-3 py-2.5 text-left hover:bg-muted",
-                        late && "bg-red-50/60",
-                      )}
-                    >
-                      <span className={cn("font-medium leading-snug break-words", step.status === "done" && "text-muted-foreground")}>
-                        {stepTitle(step, locale)}
-                      </span>
-                      <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                        <StatusBadge status={status} />
-                        <span className={cn("text-xs text-muted-foreground", late && "text-red-700")}>
-                          {step.status === "done"
-                            ? t.plan.doneLabel
-                            : late
-                              ? t.plan.overdueAgo(formatDays(overdueDays(step, today), locale))
-                              : t.plan.until(formatDate(step.deadline, locale))}
-                        </span>
-                      </span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ol>
+            <div className="mt-4">
+              <div className="mb-2 flex items-center gap-2 text-sm font-medium">
+                <FileText className="size-4 text-primary" /> {t.plan.takeWith}
+              </div>
+              <DocumentList step={nextStep} editable={false} busy={null} />
+            </div>
+            <Button className="mt-5 h-12 w-full text-base sm:w-auto sm:px-6" onClick={() => setOpenStepId(nextStep.id)}>
+              {t.plan.stepDetails} <ChevronRight />
+            </Button>
           </section>
-        );
-      })}
+        ) : (
+          <section className="rounded-2xl border bg-emerald-50 p-5 text-emerald-800">
+            <CheckCircle2 className="size-8" />
+            <h2 className="mt-2 text-lg font-semibold">{t.plan.allDoneTitle}</h2>
+            <p className="mt-1 text-sm">{t.plan.allDoneText}</p>
+          </section>
+        )}
+
+        <section className="rounded-2xl border bg-white p-5 shadow-sm">
+          <h2 className="font-semibold">{t.plan.summaryTitle}</h2>
+          <p className="mt-2 text-sm leading-relaxed text-foreground/80">{planSummary(plan, locale)}</p>
+          {curatorName ? <p className="mt-3 text-xs text-muted-foreground">{t.plan.yourCurator(curatorName)}</p> : null}
+          {selfManaged ? (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="ghost" size="sm" className="mt-3 h-9 px-2 text-muted-foreground" disabled={busy !== null}>
+                  {busy === "restart" ? <Loader2 className="animate-spin" /> : <RotateCcw />} {t.plan.restartInterview}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t.plan.restartTitle}</AlertDialogTitle>
+                  <AlertDialogDescription>{t.plan.restartText}</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => void restart()}>{t.common.confirm}</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          ) : null}
+        </section>
+      </div>
+
+      <div className="grid items-start gap-5 lg:grid-cols-2 xl:grid-cols-3">
+        {TRACK_ORDER.map((track) => {
+          const steps = plan.steps.filter((step) => step.track === track);
+          if (steps.length === 0) {
+            return null;
+          }
+          const Icon = TRACK_ICONS[track];
+          const done = steps.filter((step) => step.status === "done").length;
+          const style = TRACK_STYLE[track];
+          return (
+            <section key={track} className="rounded-2xl border bg-white p-5 shadow-sm">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <span className={cn("flex size-9 items-center justify-center rounded-lg", style.bg, style.text)}>
+                    <Icon className="size-5" />
+                  </span>
+                  <h2 className="text-lg font-semibold">{t.tracks[track]}</h2>
+                </div>
+                <span className="text-right text-sm text-muted-foreground">
+                  {done === steps.length ? t.plan.allStages : t.plan.stage(done + 1, steps.length)}
+                </span>
+              </div>
+              <Progress value={(done / steps.length) * 100} className="mt-3 h-2" />
+              <ol className="mt-4 flex flex-col">
+                {steps.map((step, index) => {
+                  const status = displayStatus(step, today);
+                  const late = status === "overdue";
+                  return (
+                    <li key={step.id} className="relative flex gap-3">
+                      <div className="flex flex-col items-center">
+                        <span className={cn("mt-4 size-3.5 shrink-0 rounded-full ring-4 ring-white", STATUS_STYLE[status].dot)} />
+                        {index < steps.length - 1 ? <span className="w-px flex-1 bg-border" /> : null}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setOpenStepId(step.id)}
+                        className={cn(
+                          "mb-2 flex min-h-14 min-w-0 flex-1 flex-col gap-1.5 rounded-xl px-3 py-2.5 text-left hover:bg-muted",
+                          late && "bg-red-50/60",
+                        )}
+                      >
+                        <span className={cn("font-medium leading-snug break-words", step.status === "done" && "text-muted-foreground")}>
+                          {stepTitle(step, locale)}
+                        </span>
+                        <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                          <StatusBadge status={status} />
+                          <span className={cn("text-xs text-muted-foreground", late && "text-red-700")}>
+                            {step.status === "done"
+                              ? t.plan.doneLabel
+                              : late
+                                ? t.plan.overdueAgo(formatDays(overdueDays(step, today), locale))
+                                : t.plan.until(formatDate(step.deadline, locale))}
+                          </span>
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ol>
+            </section>
+          );
+        })}
+      </div>
 
       <Dialog open={openStep !== null} onOpenChange={(open) => !open && setOpenStepId(null)}>
         {openStep ? (

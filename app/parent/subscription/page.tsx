@@ -15,7 +15,7 @@ export default async function SubscriptionPage() {
   ]);
   const asPlan = (value: string) => (value === "quarter" ? "quarter" : "month") as "month" | "quarter";
   return (
-    <div className="flex flex-col gap-4">
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-4">
       <div>
         <h1 className="text-2xl font-semibold">{t.subscription.title}</h1>
         <p className="text-sm text-muted-foreground">{t.subscription.subtitle}</p>

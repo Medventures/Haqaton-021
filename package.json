@@ -10,7 +10,8 @@
     "postinstall": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "prisma db seed",
-    "test:flow": "tsx scripts/test-flow.ts"
+    "test:flow": "tsx scripts/test-flow.ts",
+    "test:journal": "tsx scripts/test-journal.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { LogOut } from "lucide-react";
 import { Disclaimer, Logo } from "@/components/brand";
 import { LanguageSwitch } from "@/components/language-switch";
+import { MobileNavigation } from "@/components/mobile-navigation";
 import { NavLinks, type NavLink } from "@/components/nav-links";
 import type { CurrentUser } from "@/lib/auth";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
@@ -16,6 +17,7 @@ function navFor(role: Role, t: Dictionary, badges: Partial<Record<string, number
         { href: "/parent", label: t.nav.route, exact: true },
         { href: "/specialists", label: t.nav.specialists },
         { href: "/parent/calendar", label: t.nav.calendar },
+        { href: "/parent/journal", label: t.nav.journal },
         { href: "/parent/documents", label: t.nav.documents },
         { href: "/parent/subscription", label: t.nav.subscription },
       ];
@@ -28,6 +30,7 @@ function navFor(role: Role, t: Dictionary, badges: Partial<Record<string, number
     case "specialist":
       return [
         { href: "/specialist", label: t.nav.myProfile, exact: true },
+        { href: "/specialist/journal", label: t.nav.journal },
         { href: "/specialists", label: t.nav.specialists },
       ];
     case "commission":
@@ -63,24 +66,20 @@ export async function AppShell({
   disclaimer?: boolean;
 }) {
   const { t } = await getI18n();
-  const container = width === "narrow" ? "max-w-2xl" : "max-w-7xl";
+  const contentContainer = width === "narrow" ? "max-w-2xl" : "max-w-7xl";
+  const headerContainer = "max-w-7xl";
   const links = user ? navFor(user.role, t, badges) : [{ href: "/specialists", label: t.nav.specialists }];
   const showDisclaimer = disclaimer ?? (!user || user.role === "parent");
   return (
     <div className="flex flex-1 flex-col">
       <header className="sticky top-0 z-20 border-b bg-background/90 backdrop-blur">
-        <div className={cn("mx-auto flex h-14 items-center justify-between gap-3 px-4", container)}>
-          <div className="flex min-w-0 items-center gap-4">
-            <Logo href={user ? cabinetPath(user.role) : "/"} />
-            <div className="hidden min-w-0 md:block">
-              <NavLinks links={links} />
-            </div>
-          </div>
+        <div className={cn("mx-auto flex h-14 items-center justify-between gap-3 px-4 sm:px-6", headerContainer)}>
+          <Logo href={user ? cabinetPath(user.role) : "/"} />
           <div className="flex shrink-0 items-center gap-2">
             <LanguageSwitch />
             {user ? (
               <>
-                <div className="hidden text-right text-xs leading-tight lg:block">
+                <div className="hidden text-right text-xs leading-tight xl:block">
                   <div className="font-medium text-foreground">{user.name}</div>
                   <div className="text-muted-foreground">{t.roles[user.role]}</div>
                 </div>
@@ -106,14 +105,17 @@ export async function AppShell({
                 </Link>
               </>
             )}
+            <MobileNavigation links={links} label={t.nav.menu} closeLabel={t.common.close} container={headerContainer} />
           </div>
         </div>
-        <div className={cn("mx-auto px-4 pb-2 md:hidden", container)}>
-          <NavLinks links={links} />
+        <div className="hidden border-t bg-white/50 lg:block">
+          <div className={cn("mx-auto px-4 py-2 sm:px-6", headerContainer)}>
+            <NavLinks links={links} label={t.nav.menu} />
+          </div>
         </div>
       </header>
-      <main className={cn("mx-auto w-full flex-1 px-4 py-5", container)}>{children}</main>
-      <footer className={cn("mx-auto flex w-full flex-col gap-3 px-4 pb-6 text-xs text-muted-foreground", container)}>
+      <main className={cn("mx-auto w-full flex-1 px-4 py-5 sm:px-6 lg:py-8", contentContainer)}>{children}</main>
+      <footer className={cn("mx-auto flex w-full flex-col gap-3 px-4 pb-6 text-xs text-muted-foreground sm:px-6", contentContainer)}>
         {showDisclaimer ? <Disclaimer t={t} /> : null}
         <div className="flex flex-wrap gap-x-4 gap-y-1">
           <Link href="/legal/terms" className="hover:text-foreground hover:underline">

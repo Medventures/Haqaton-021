@@ -4,6 +4,7 @@ import { ArrowLeft, History, TriangleAlert } from "lucide-react";
 import { CaseStatusBadge } from "@/components/badges";
 import { CalendarBoard } from "@/components/calendar/calendar-board";
 import { CasePlanBoard } from "@/components/curator/case-plan-board";
+import { JournalHistory } from "@/components/journal/journal-history";
 import { GeneratePlanButton } from "@/components/curator/generate-plan-button";
 import { FileManager } from "@/components/files/file-manager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,6 +17,7 @@ import { getI18n } from "@/lib/i18n/server";
 import { loadQuestionDefs } from "@/lib/interview/questions";
 import { describeAnswer } from "@/lib/interview/slots";
 import { STATUS_STYLE } from "@/lib/labels";
+import { loadJournal } from "@/lib/journal";
 import { historyNote, stepTitle } from "@/lib/plan/view";
 import { today } from "@/lib/time";
 import { cn } from "@/lib/utils";
@@ -29,10 +31,11 @@ export default async function CuratorCasePage({ params }: { params: Promise<{ id
   if (!record || record.curatorId !== user.id) {
     notFound();
   }
-  const [currentDay, events, defs] = await Promise.all([
+  const [currentDay, events, defs, journal] = await Promise.all([
     today(),
     prisma.escalationEvent.findMany({ where: { caseId: id, resolvedAt: null } }),
     loadQuestionDefs(),
+    loadJournal(id),
   ]);
   const defsById = new Map(defs.map((def) => [def.id, def]));
   const plan = record.plan;
@@ -93,6 +96,7 @@ export default async function CuratorCasePage({ params }: { params: Promise<{ id
           <TabsTrigger value="answers">{t.curator.tabs.answers}</TabsTrigger>
           <TabsTrigger value="documents">{t.curator.tabs.documents}</TabsTrigger>
           <TabsTrigger value="calendar">{t.curator.tabs.calendar}</TabsTrigger>
+          <TabsTrigger value="journal">{t.curator.tabs.journal}</TabsTrigger>
           <TabsTrigger value="history">{t.curator.tabs.history}</TabsTrigger>
         </TabsList>
 
@@ -156,6 +160,10 @@ export default async function CuratorCasePage({ params }: { params: Promise<{ id
 
         <TabsContent value="calendar">
           <CalendarBoard mode="curator" fixedCaseId={record.id} />
+        </TabsContent>
+
+        <TabsContent value="journal">
+          <JournalHistory journal={journal} />
         </TabsContent>
 
         <TabsContent value="history">

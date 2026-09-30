@@ -6,7 +6,7 @@ export default async function ParentDocumentsPage() {
   await requirePageUser("parent");
   const { t } = await getI18n();
   return (
-    <div className="flex flex-col gap-4">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-4">
       <div>
         <h1 className="text-2xl font-semibold">{t.files.title}</h1>
         <p className="text-sm text-muted-foreground">{t.files.subtitle}</p>
