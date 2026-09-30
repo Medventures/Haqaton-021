@@ -23,3 +23,5 @@ next-env.d.ts
 npm-debug.log*
 prisma/*.db
 prisma/*.db-journal
+
+.presentation_research/
